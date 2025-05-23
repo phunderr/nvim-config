@@ -1,22 +1,49 @@
 return {
   {
     "mason-org/mason.nvim",
-    config = function ()
-      require("mason").setup()
-    end
+    opts = {},
   },
   {
-    "williamboman/mason-lspconfig.nvim",
-    config = function() 
-      require("mason-lspconfig").setup {
-        ensure_installed = { "lua_ls" },
+    "mason-org/mason-lspconfig.nvim",
+    opts = {
+      ensure_installed = {
+        "lua_ls",
+        "rust_analyzer"
+      },
+    },
+    depedencies = {
+      { "mason-org/mason.nvim", opts = {} },
+      "neovim/nvim-lspconfig",
+    },
+  },
+  { 
+    "neovim/nvim-lspconfig", 
+    opts = function()
+      local ret = {
+        servers = {
+          lua_ls = {
+            settings = {
+              Lua = {
+                hint = {
+                  enable = true,
+                  setType = false,
+                  paramType = true,
+                  paramName = "Disable",
+                  semicolon = "Disable",
+                  arrayIndex = "Disable",
+                },
+              },
+            },
+          },
+        },
+      setup = {},
       }
-    end
+      return ret
+   end,
+    config = function(_, opts)
+      for server, server_opts in pairs(opts.servers) do
+        require("lspconfig")[server].setup(server_opts)
+      end
+    end,
   },
-  {
-    "neovim/nvim-lspconfig",
-    config = function()
-      vim.lsp.enable('lua_ls')
-    end
-  }
 }
